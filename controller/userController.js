@@ -3,8 +3,10 @@ const mongoose = require("mongoose")
 // const jwt = require("jsonwebtoken")
 const userModel = require("../model/userModel");
 const savedModel = require("../model/savedModel");
+const submittedModel = require("../model/submittedModel")
 const crypto = require('crypto');
-const joi = require("joi")
+const joi = require("joi");
+
 
 exports.signUp = async (req, res) => {
   try {
@@ -17,25 +19,31 @@ exports.signUp = async (req, res) => {
       }
 
       const existingUser = await userModel.findOne({ phoneNumber });
-      if (existingUser) {
-          return res.status(400).json({
-              message: `User with the phone number already exists`,
-          });
+      // if (existingUser) {
+      //     return res.status(400).json({
+      //         message: `User with the phone number already exists`,
+      //     });
+
+      // }
+
+      // // Create the user first
+      // const user = new userModel({
+      //     phoneNumber: phoneNumber.trim()
+
+      // });
+      if (!existingUser) {
+        existingUser = new userModel({ phoneNumber });
+        await existingUser.save();
       }
 
-      // Create the user first
-      const user = new userModel({
-          phoneNumber: phoneNumber.trim()
-      });
-
-      const uniqueLink = `http://localhost:2450/api/v1/user/${user._id}`;
-      user.uniqueLink = uniqueLink; 
-      await user.save();
+      const uniqueLink = `http://localhost:2450/api/v1/user/${existingUser._id}`;
+      existingUser.uniqueLink = uniqueLink; 
+      await existingUser.save();
 
       res.status(200).json({
           message: `User link generated successfully`,
           data: uniqueLink,
-          data:user
+          data:existingUser
       });
 
   } catch (error) {
@@ -148,5 +156,40 @@ exports.saveName = async (req, res) => {
     return res.status(500).json({
       message: "Server error: " + error.message,
     });
+  }
+};
+
+
+//get common names
+exports.getSubmittedData = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const submissions = await savedModel.find({ user: userId });
+
+    if (!submissions || submissions.length === 0) {
+      return res.status(404).json({ message: 'No submissions found' });
+    }
+
+    const nameCount = {};
+    submissions.forEach(sub => {
+      const name = sub.savedName.toLowerCase().trim();
+      nameCount[name] = (nameCount[name] || 0) + 1;
+    });
+
+    let mostCommonName = null;
+    let maxCount = 0;
+
+    for (const name in nameCount) {
+      if (nameCount[name] > maxCount) {
+        maxCount = nameCount[name];
+        mostCommonName = name;
+      }
+    }
+
+    res.json({ mostCommonName, count: maxCount, allNames: nameCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };

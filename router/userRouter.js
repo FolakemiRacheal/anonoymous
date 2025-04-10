@@ -1,5 +1,5 @@
 const express = require("express")
-const {signUp,getSavedContactWithUser,getNames,getAll,saveName,}= require("../controller/userController")
+const {signUp,getSavedContactWithUser,getNames,getAll,saveName,getSubmittedData}= require("../controller/userController")
 
 const router = express.Router()
 
@@ -8,6 +8,7 @@ router.get("/getSavedContactWithUser/:id", getSavedContactWithUser)
 router.post("/saveName/:userId",saveName)
 router.get("/getAll",getAll)
 router.get("/getNames/:userId",getNames) 
+router.get('/getSubmittedData/:userId',getSubmittedData)
 
 
 module.exports = router
