@@ -10,47 +10,54 @@ const joi = require("joi");
 
 exports.signUp = async (req, res) => {
   try {
-      const { phoneNumber } = req.body;
+    const { phoneNumber } = req.body;
 
-      if (!phoneNumber) {
-          return res.status(400).json({
-              message: `Please enter all details`,
-          });
-      }
-
-      const existingUser = await userModel.findOne({ phoneNumber });
-      // if (existingUser) {
-      //     return res.status(400).json({
-      //         message: `User with the phone number already exists`,
-      //     });
-
-      // }
-
-      // // Create the user first
-      // const user = new userModel({
-      //     phoneNumber: phoneNumber.trim()
-
-      // });
-      if (!existingUser) {
-        existingUser = new userModel({ phoneNumber });
-        await existingUser.save();
-      }
-
-      const uniqueLink = `http://localhost:2450/api/v1/user/${existingUser._id}`;
-      existingUser.uniqueLink = uniqueLink; 
-      await existingUser.save();
-
-      res.status(200).json({
-          message: `User link generated successfully`,
-          data: uniqueLink,
-          data:existingUser
+    if (!phoneNumber) {
+      return res.status(400).json({
+        message: "Please enter all details",
       });
+    }
 
+    let existingUser = await userModel.findOne({ phoneNumber });
+
+    if (!existingUser) {
+      existingUser = new userModel({ phoneNumber });
+      await existingUser.save();
+    }
+
+    const uniqueLink = `http://localhost:2450/api/v1/user/${existingUser._id}`;
+    existingUser.uniqueLink = uniqueLink;
+    await existingUser.save();
+
+    res.status(200).json({
+      message: "User link generated successfully",
+      data: {
+        uniqueLink: uniqueLink,
+        userId: existingUser._id,
+      },
+    });
   } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ error: "Internal server error" });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
+
+// Other functions remain unchanged
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exports.getSavedContactWithUser = async (req, res) => {
   try {
