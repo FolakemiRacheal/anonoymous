@@ -1,8 +1,10 @@
 const express = require("express")
 const mongoose = require("mongoose")
+// const jwt = require("jsonwebtoken")
 const userModel = require("../model/userModel");
 const savedModel = require("../model/savedModel");
 const submittedModel = require("../model/submittedModel")
+const crypto = require('crypto');
 const joi = require("joi");
 
 
@@ -16,7 +18,19 @@ exports.signUp = async (req, res) => {
           });
       }
 
-      let existingUser = await userModel.findOne({ phoneNumber });
+      const existingUser = await userModel.findOne({ phoneNumber });
+      // if (existingUser) {
+      //     return res.status(400).json({
+      //         message: `User with the phone number already exists`,
+      //     });
+
+      // }
+
+      // // Create the user first
+      // const user = new userModel({
+      //     phoneNumber: phoneNumber.trim()
+
+      // });
       if (!existingUser) {
         existingUser = new userModel({ phoneNumber });
         await existingUser.save();
@@ -28,10 +42,8 @@ exports.signUp = async (req, res) => {
 
       res.status(200).json({
           message: `User link generated successfully`,
-          data: {
-            uniqueLink,
-            user: existingUser // Return both the unique link and the user object
-          }
+          data: uniqueLink,
+          data:existingUser
       });
 
   } catch (error) {
@@ -86,9 +98,10 @@ exports.getNames = async (req, res) => {
       });
     }
 
+    // Return the names and the user's unique link if names are found
     return res.status(200).json({
-      message: "names retrieved successfully",
-      data: names 
+      message: "Names retrieved successfully",
+      data: names // This will include the names and user uniqueLink
     });
 
   } catch (error) {
@@ -113,6 +126,8 @@ exports.saveName = async (req, res) => {
         message: "Invalid user ID format",
       });
     }
+
+    // Ensure savedName is provided
     if (!savedName) {
       return res.status(400).json({
         message: "Please provide the name you saved this contact as",
@@ -125,6 +140,8 @@ exports.saveName = async (req, res) => {
         message: "User not found",
       });
     }
+
+    // Save the submitted name linked to the user
     const saved = await savedModel.create({
       savedName,
       user: userId, 
@@ -135,6 +152,7 @@ exports.saveName = async (req, res) => {
       data: saved,
     });
   } catch (error) {
+    console.error("Error:", error); // Log error for debugging
     return res.status(500).json({
       message: "Server error: " + error.message,
     });
