@@ -1,10 +1,8 @@
 const express = require("express")
 const mongoose = require("mongoose")
-// const jwt = require("jsonwebtoken")
 const userModel = require("../model/userModel");
 const savedModel = require("../model/savedModel");
 const submittedModel = require("../model/submittedModel")
-const crypto = require('crypto');
 const joi = require("joi");
 
 
@@ -30,8 +28,10 @@ exports.signUp = async (req, res) => {
 
       res.status(200).json({
           message: `User link generated successfully`,
-          data: uniqueLink,
-          data:existingUser
+          data: {
+            uniqueLink,
+            user: existingUser // Return both the unique link and the user object
+          }
       });
 
   } catch (error) {
