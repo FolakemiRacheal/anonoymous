@@ -19,18 +19,6 @@ exports.signUp = async (req, res) => {
       }
 
       const existingUser = await userModel.findOne({ phoneNumber });
-      // if (existingUser) {
-      //     return res.status(400).json({
-      //         message: `User with the phone number already exists`,
-      //     });
-
-      // }
-
-      // // Create the user first
-      // const user = new userModel({
-      //     phoneNumber: phoneNumber.trim()
-
-      // });
       if (!existingUser) {
         existingUser = new userModel({ phoneNumber });
         await existingUser.save();
@@ -98,10 +86,9 @@ exports.getNames = async (req, res) => {
       });
     }
 
-    // Return the names and the user's unique link if names are found
     return res.status(200).json({
-      message: "Names retrieved successfully",
-      data: names // This will include the names and user uniqueLink
+      message: "names retrieved successfully",
+      data: names 
     });
 
   } catch (error) {
@@ -126,8 +113,6 @@ exports.saveName = async (req, res) => {
         message: "Invalid user ID format",
       });
     }
-
-    // Ensure savedName is provided
     if (!savedName) {
       return res.status(400).json({
         message: "Please provide the name you saved this contact as",
@@ -140,8 +125,6 @@ exports.saveName = async (req, res) => {
         message: "User not found",
       });
     }
-
-    // Save the submitted name linked to the user
     const saved = await savedModel.create({
       savedName,
       user: userId, 
@@ -152,7 +135,6 @@ exports.saveName = async (req, res) => {
       data: saved,
     });
   } catch (error) {
-    console.error("Error:", error); // Log error for debugging
     return res.status(500).json({
       message: "Server error: " + error.message,
     });
