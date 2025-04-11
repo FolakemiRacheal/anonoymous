@@ -16,7 +16,7 @@ exports.signUp = async (req, res) => {
           });
       }
 
-      const existingUser = await userModel.findOne({ phoneNumber });
+      let existingUser = await userModel.findOne({ phoneNumber });
       if (!existingUser) {
         existingUser = new userModel({ phoneNumber });
         await existingUser.save();
